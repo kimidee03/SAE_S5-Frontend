@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRecommendationResults } from '../services/recommendationApi';
-import ActivityCard from '../components/ActivityCard';
+import { getRecommendationResults } from '../services/recommendationService';
+import ActivityCard from '../features/search/ActivityCard';
+import logoSpotly from '../assets/logo-spotly.png';
 
-export const RecommendationsPage = () => {
-  const { id: searchId } = useParams();
+export default function RecommendationsPage({ searchId: propSearchId }) {
+  const { id: paramSearchId } = useParams();
+  const searchId = propSearchId || paramSearchId || 1;
+
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,10 +18,10 @@ export const RecommendationsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getRecommendationResults(searchId || 1);
+        const data = await getRecommendationResults(searchId);
         setActivities(data);
       } catch {
-        setError("Impossible de charger les recommandations."); 
+        setError("Impossible de charger les recommandations.");
       } finally {
         setLoading(false);
       }
@@ -29,12 +32,12 @@ export const RecommendationsPage = () => {
 
   return (
     <div className="flex h-screen w-full bg-gray-100 overflow-hidden relative">
-      
+
       {/* Logo Spotly Flottant */}
       <div className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded-full shadow-md flex items-center gap-2.5 overflow-hidden">
-        <img 
-          src="/logo-spotly.png" 
-          alt="Logo Spotly" 
+        <img
+          src={logoSpotly}
+          alt="Logo Spotly"
           className="w-8 h-8 object-contain scale-[3]"
         />
         <span className="font-bold text-gray-800">Spotly</span>
@@ -47,7 +50,7 @@ export const RecommendationsPage = () => {
           className="w-full h-full min-h-screen border-0 grayscale-[20%] contrast-[95%]"
           src="https://www.openstreetmap.org/export/embed.html?bbox=2.25,48.81,2.42,48.90&layer=mapnik"
         />
-        
+
         <div className="absolute bottom-6 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold text-gray-800 flex items-center gap-2">
           <span className="text-red-500">📍</span> Paris
         </div>
@@ -55,7 +58,7 @@ export const RecommendationsPage = () => {
 
       {/* Droite : Panneau latéral */}
       <div className="w-1/2 h-full bg-gray-50 flex flex-col p-8 overflow-y-auto">
-        
+
         <div className="mb-6">
           <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">BONJOUR AKSWIN</span>
           <div className="flex justify-between items-center mt-1">
@@ -137,6 +140,4 @@ export const RecommendationsPage = () => {
       </div>
     </div>
   );
-};
-
-export default RecommendationsPage;
+}

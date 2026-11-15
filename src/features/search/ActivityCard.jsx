@@ -1,4 +1,4 @@
-export const ActivityCard = ({ activity }) => {
+export default function ActivityCard({ activity }) {
   const {
     name,
     categories = [],
@@ -10,13 +10,12 @@ export const ActivityCard = ({ activity }) => {
     ? (typeof categories[0] === 'string' ? categories[0] : categories[0].name)
     : (typeof categories === 'string' ? categories : 'Activité');
 
-  const formattedDistance = distance 
-    ? distance >= 1000 
-      ? `${(distance / 1000).toFixed(0)} km` 
+  const formattedDistance = distance
+    ? distance >= 1000
+      ? `${(distance / 1000).toFixed(0)} km`
       : `${Math.round(distance)} m`
     : '9 km';
 
-  // Formate le score (ex: 0.92 -> 92% ou 92 -> 92%)
   const formattedScore = score !== undefined && score !== null
     ? `${score <= 1 ? Math.round(score * 100) : Math.round(score)}% pertinent`
     : null;
@@ -26,7 +25,7 @@ export const ActivityCard = ({ activity }) => {
       <div>
         <div className="flex justify-between items-start gap-2 mb-1">
           <h3 className="font-bold text-xl text-gray-900 leading-snug">{name}</h3>
-          
+
           <div className="flex items-center gap-2 shrink-0">
             {formattedScore && (
               <span className="bg-amber-100 text-amber-800 font-semibold text-xs px-3 py-1 rounded-full">
@@ -48,6 +47,4 @@ export const ActivityCard = ({ activity }) => {
       </button>
     </div>
   );
-};
-
-export default ActivityCard;
+}
