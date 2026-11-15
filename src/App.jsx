@@ -1,23 +1,17 @@
-import { useState } from 'react'
-import PageLayout from './components/layout/PageLayout'
-import Acceuil from './pages/Acceuil'
-import Address from './pages/Address'
-import Preference from './pages/Preference'
 
-export default function HomePage() {
-  const [etape, setEtape] = useState(1)
-  let page;
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import RecommendationsPage from './pages/RecommendationsPage';
+import Questionnaire from './pages/Questionnaire';
 
-  if (etape === 1) page = <Acceuil onSuivant={() => { setEtape(2) }} />;
-  else if (etape === 2) page = <Address onSuivant={() => { setEtape(3) }} />;
-  else if (etape === 3) page = <Preference />;
-  else page = <Acceuil onSuivant={() => { setEtape(2) }} />;
-
+function App() {
   return (
-    <PageLayout>
-      {page}
-    </PageLayout>
-
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Questionnaire />} />
+        <Route path="/recommendations/:id" element={<RecommendationsPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
+export default App;
