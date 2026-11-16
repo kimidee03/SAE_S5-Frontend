@@ -1,0 +1,35 @@
+/* Polices Google Fonts du projet */
+@import url("https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Nunito:wght@400;600;800&display=swap");
+
+/* Polices disponibles dans Tailwind (font-manuscrit, font-texte) */
+@theme {
+    --font-manuscrit: "Caveat Brush", cursive;
+    --font-texte: "Nunito", sans-serif;
+}
+
+/* Nom de l'appli dans le cadre du logo */
+@utility nom-appli {
+    font-family: var(--font-texte);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-emerald-900);
+}
+
+/* Petit texte au-dessus du titre  */
+@utility surtitre {
+    font-family: var(--font-texte);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: white;
+}
+
+/* Grand titre manuscrit */
+@utility titre-manuscrit {
+    font-family: var(--font-manuscrit);
+    font-size: 3.5rem;
+    /* au lieu de 4.5rem */
+    line-height: 1.1;
+    color: white;
+}

@@ -22,9 +22,12 @@ npm run dev        # http://localhost:5173
 
 ```
 src/
-├── main.jsx          # Point d'entrée : monte <App/> dans la page
-├── App.jsx           # Composant racine
-├── index.css         # Import de Tailwind + styles globaux
+├── main.jsx          # Point d'entrée : monte <App/> dans <VisitorProvider>
+├── App.jsx           # Composant racine (affiche la page d'accueil)
+│
+├── style/
+│   ├── index.css         # Importe typographie.css puis Tailwind
+│   └── typographie.css   # Polices + utilitaires de texte (titre-manuscrit…)
 │
 ├── assets/           # Images, SVG… importés dans le code
 ├── components/       # Composants RÉUTILISABLES, sans logique métier
@@ -93,19 +96,75 @@ src/
 
 ---
 
-# React + Vite
+# Avancement
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Ce qui est fait
 
-Currently, two official plugins are available:
+### Page d'accueil visiteur — `src/pages/Acceuil.jsx`
+Premier écran de **Spotly** : on demande son prénom au visiteur.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Image de fond plein écran (`public/background-image.jpg`) assombrie par un calque `bg-black/40`.
+- Logo + nom « Spotly » en haut à gauche (`public/logo.png`).
+- Titre « Comment vous appelez-vous ? » avec la police manuscrite.
+- Formulaire : icône utilisateur, champ prénom, bouton flèche (icônes `lucide-react`).
 
-## React Compiler
+Fonctionnement du formulaire :
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+le visiteur tape  →  state local (vistorInput)        ← brouillon, seul l'input le voit
+       ↓ Entrée ou clic sur la flèche (onSubmit du <form>)
+e.preventDefault()   → pas de rechargement de la page
+.trim()              → enlève les espaces autour
+champ vide ?         → on s'arrête
+setVisitor(prénom)   → contexte : toute l'app connaît le prénom
+```
 
-## Expanding the ESLint configuration
+L'input est **contrôlé** : `value={vistorInput}` + `onChange` qui appelle `setvisitorInput`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Contexte visiteur — `src/context/VisitorContext.jsx`
+Partage le prénom du visiteur avec toute l'application.
+
+- `VisitorProvider` : contient le state `visitor` (`null` au départ) et l'expose avec `setVisitor`. Il entoure `<App />` dans `main.jsx`.
+- `useVisitor()` : hook pour lire ou modifier le visiteur depuis n'importe quel composant. Il lève une erreur s'il est utilisé hors du Provider.
+
+```jsx
+const { visitor, setVisitor } = useVisitor();   // objet → accolades { }
+const [texte, setTexte] = useState('');         // useState → crochets [ ]
+```
+
+⚠️ Le contexte n'est **pas** un stockage : il est vidé à chaque rafraîchissement de la page (F5). Pour garder le prénom, il faudra l'enregistrer dans `localStorage`.
+
+### Style — `src/style/`
+- Tailwind v4 via le plugin Vite (`vite.config.js`), pas de `tailwind.config.js`.
+- `typographie.css` charge deux polices Google Fonts :
+  - `font-manuscrit` : Caveat Brush (titres, champ prénom) ;
+  - `font-texte` : Nunito (texte courant).
+- Utilitaires maison : `titre-manuscrit` (utilisé), `surtitre` et `nom-appli` (prêts, mais pas encore utilisés dans la page).
+- `index.css` doit importer `typographie.css` **avant** `tailwindcss`, sinon le `@import` des polices est ignoré.
+
+## État vérifié (14/11/2026)
+
+| Vérification | Résultat |
+| --- | --- |
+| `npm run build` | ✅ passe, sans warning |
+| `npm run lint` | ❌ 1 erreur `react-refresh/only-export-components` dans `VisitorContext.jsx` |
+| Test navigateur | ✅ « Hariz » est bien envoyé dans le contexte, espaces retirés ; un champ fait seulement d'espaces est refusé ; aucune erreur console |
+
+## À faire pour reprendre
+
+**Nettoyage immédiat**
+- [ ] Retirer la ligne de test `<p>Contexte : {visitor}</p>` dans `Acceuil.jsx`, puis retirer `visitor` du `const { ... }` (sinon le lint le signalera).
+- [ ] Régler le lint `react-refresh` : déplacer `useVisitor` dans son propre fichier (ex. `hooks/useVisitor.js`).
+- [ ] Supprimer `public/logo.png.sb-4272a044-LkpL1P` (fichier temporaire).
+- [ ] Supprimer le commentaire dupliqué « div pour le texte de bienvenue ».
+- [ ] Renommer pour suivre les conventions : `Acceuil` → `Accueil`, `vistorInput` / `setvisitorInput` → `prenom` / `setPrenom`, `visitorF` → `prenomPropre`.
+- [ ] Passer `Accueil` en `export default`, comme le demande la règle « Un composant = un fichier ».
+- [ ] `index.html` : le favicon `/favicon.svg` a été supprimé (le remplacer par le logo), mettre `lang="fr"` et le titre « Spotly ».
+- [ ] `Dockerfile` : `node:18-alpine` est trop ancien pour Vite 8 (Node `20.19+` ou `22.12+` requis). Passer à `node:22-alpine`.
+- [ ] Commiter le travail en cours : rien n'est encore commité sur la branche `AcceuilVisiteur`.
+
+**Prochaine fonctionnalité**
+- [ ] Décider de ce qui s'affiche après la validation du prénom (« Bonjour Hariz », page suivante…).
+  - Peu d'écrans → affichage conditionnel dans `App.jsx` (`visitor` vide → Accueil, sinon autre page).
+  - Plusieurs pages → installer React Router.
+- [ ] Optionnel : garder le prénom après F5 avec `localStorage`.
